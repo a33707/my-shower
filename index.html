@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인형 놀이 목욕 게임</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+        #game-container { background: white; width: 360px; height: 600px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        #screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        #character { width: 150px; height: 250px; background: #ffe4e1; border-radius: 75px 75px 20px 20px; position: relative; transition: all 0.5s; border: 2px solid #ffb6c1; }
+        #character.glowing { box-shadow: 0 0 30px #fff700; border: 3px solid #fff700; }
+        .eyes { position: absolute; top: 40px; width: 100%; display: flex; justify-content: space-around; padding: 0 30px; box-sizing: border-box; }
+        .eye { width: 15px; height: 15px; background: #333; border-radius: 50%; }
+        
+        #ui { background: #fafafa; padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #eee; }
+        button { padding: 10px 5px; font-size: 12px; cursor: pointer; border: none; border-radius: 10px; background: #e0f0ff; transition: 0.2s; }
+        button:hover { background: #b3d9ff; }
+        button:disabled { background: #ccc; cursor: default; }
+
+        #message { position: absolute; top: 20px; width: 80%; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 15px; text-align: center; font-size: 14px; font-weight: bold; color: #555; pointer-events: none; }
+        .clothes-item { position: absolute; top: 100px; width: 160px; height: 160px; display: none; pointer-events: none; text-align: center; font-size: 80px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="message">안녕! 우리 같이 깨끗하게 씻고 옷 입을까?</div>
+    <div id="screen">
+        <div id="character">
+            <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        </div>
+        <div id="item-panties" class="clothes-item">🩲</div>
+        <div id="item-top" class="clothes-item">👕</div>
+        <div id="item-bottom" class="clothes-item">👖</div>
+        <div id="item-dress" class="clothes-item">👗</div>
+        <div id="item-pajamas" class="clothes-item">✨🌙</div>
+    </div>
+    
+    <div id="ui">
+        <button onclick="stepSoap()">🧼 비누칠</button>
+        <button onclick="stepWater()">🚿 물 칙칙</button>
+        <button onclick="stepTowel()">🧼 수건 톡톡</button>
+        <button onclick="stepLotion()">🧴 아빠 로션</button>
+        <button onclick="stepHair()">💨 머리 말리기</button>
+        <button onclick="stepGlow()">⭐ 누가 더 빛나나</button>
+        <button onclick="showCloset()">👗 옷 입히기</button>
+        <button onclick="resetGame()">🔄 다시 하기</button>
+    </div>
+</div>
+
+<div id="closet" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:20px; border:2px solid #ffb6c1; z-index:100;">
+    <h3>어떤 옷을 입을까?</h3>
+    <button onclick="putOn('panties')">🩲 팬티</button>
+    <button onclick="putOn('top')">👕 상의</button>
+    <button onclick="putOn('bottom')">👖 하의</button>
+    <button onclick="putOn('dress')">👗 드레스</button>
+    <button onclick="putOn('pajamas')">🌙 잠옷</button>
+    <br><br>
+    <button onclick="finishGame()">🤐 지퍼 올리기 (끝!)</button>
+</div>
+
+<script>
+    const msg = document.getElementById('message');
+    const char = document.getElementById('character');
+
+    function stepSoap() {
+        msg.innerText = "손가락으로 보들보들~ 비누칠을 해요.";
+        char.style.background = "#ffffff"; // 거품 표현
+    }
+
+    function stepWater() {
+        msg.innerText = "물로 칙칙! 깨끗하게 씻어내요.";
+        char.style.background = "#e0f0ff";
+    }
+
+    function stepTowel() {
+        msg.innerText = "수건으로 다이 다이 톡톡톡 닦아주기!";
+        char.style.background = "#ffe4e1";
+    }
+
+    function stepLotion() {
+        msg.innerText = "아빠가 로션을 부드럽게 발라줄게~";
+        char.style.boxShadow = "inset 0 0 20px white";
+    }
+
+    function stepHair() {
+        msg.innerText = "따뜻한 바람으로 머리를 말려요. 윙~";
+    }
+
+    function stepGlow() {
+        msg.innerText = "누가 누가 더 오래, 더 밝게 빛나나 보자!";
+        char.classList.add('glowing');
+    }
+
+    function showCloset() {
+        document.getElementById('closet').style.display = 'block';
+    }
+
+    function putOn(type) {
+        // 모든 옷 숨기기
+        document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
+        // 선택한 옷 보이기
+        const item = document.getElementById('item-' + type);
+        item.style.display = 'block';
+        msg.innerText = type + "을(를) 예쁘게 입었어요!";
+    }
+
+    function finishGame() {
+        document.getElementById('closet').style.display = 'none';
+        msg.innerText = "지퍼를 쭉~! 우리 아이 참 예쁘다. 잘 자요!";
+    }
+
+    function resetGame() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
