@@ -5,9 +5,6 @@ export class GameState {
         this.isProcessing = false;
         this.completedSteps = new Set();
         this.listeners = [];
-        this.expectedSequence = ['soap', 'water', 'towel', 'lotion', 'hair', 'glow', 'closet'];
-        this.currentStepIndex = 0;
-        this.perfectCombo = true;
     }
 
     subscribe(listener) {
@@ -27,44 +24,24 @@ export class GameState {
     async performWashStep(stepId, scoreValue = 10) {
         if (this.isGameOver || this.isProcessing) return;
 
-        // Check sequence constraints
-        const expectedStep = this.expectedSequence[this.currentStepIndex];
+        this.setProcessing(true);
 
-        if (stepId === expectedStep) {
-            // Correct step
-            this.setProcessing(true);
+        if (!this.completedSteps.has(stepId)) {
             this.completedSteps.add(stepId);
             this.score += scoreValue;
-            this.currentStepIndex++;
             this.notify('scoreUpdated', { amount: scoreValue });
-            this.notify('progressUpdated', { progress: this.currentStepIndex / this.expectedSequence.length });
-            this.notify('washStepPerformed', stepId);
-
-            await new Promise(resolve => setTimeout(resolve, 600));
-            this.setProcessing(false);
-        } else if (this.completedSteps.has(stepId)) {
-            // Re-clicking an old step breaks perfect combo but allows the action visually
-            this.perfectCombo = false;
-            this.setProcessing(true);
-            this.notify('washStepPerformed', stepId);
-            await new Promise(resolve => setTimeout(resolve, 600));
-            this.setProcessing(false);
-        } else {
-            // Trying to click a future step - block it
-            return;
         }
+
+        this.notify('washStepPerformed', stepId);
+
+        // Simulate a small delay for animation/processing
+        await new Promise(resolve => setTimeout(resolve, 600));
+        this.setProcessing(false);
     }
 
     showCloset() {
         if (this.isGameOver || this.isProcessing) return;
-
-        const expectedStep = this.expectedSequence[this.currentStepIndex];
-        if (expectedStep === 'closet') {
-            this.currentStepIndex++;
-            this.completedSteps.add('closet');
-            this.notify('progressUpdated', { progress: this.currentStepIndex / this.expectedSequence.length });
-            this.notify('closetToggled', true);
-        }
+        this.notify('closetToggled', true);
     }
 
     async putOn(type) {
@@ -87,13 +64,6 @@ export class GameState {
 
     finishGame() {
         if (this.isGameOver || this.isProcessing) return;
-
-        if (this.perfectCombo && this.currentStepIndex >= this.expectedSequence.length) {
-            this.score += 50; // Perfect combo bonus
-            this.notify('scoreUpdated', { amount: 50 });
-            this.notify('perfectComboAchieved', null);
-        }
-
         this.isGameOver = true;
         this.notify('gameOver', null);
     }
@@ -103,8 +73,6 @@ export class GameState {
         this.isGameOver = false;
         this.isProcessing = false;
         this.completedSteps.clear();
-        this.currentStepIndex = 0;
-        this.perfectCombo = true;
         this.notify('gameReset', null);
     }
 }
@@ -120,15 +88,14 @@ export class UIManager {
         this.closet = document.getElementById('closet');
         this.scoreEl = document.getElementById('score');
         this.gameContainer = document.getElementById('game-container');
-        this.buttons = document.querySelectorAll('button[data-action]');
-        this.progressBar = document.getElementById('progress-bar-fill');
+        this.buttons = document.querySelectorAll('button');
 
         this.bindEvents();
-        this.updateButtonStates();
     }
 
     bindEvents() {
-        this.buttons.forEach(btn => {
+        // Find buttons by data-action attribute
+        document.querySelectorAll('button[data-action]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const action = btn.getAttribute('data-action');
                 if (action.startsWith('puton-')) {
@@ -146,44 +113,10 @@ export class UIManager {
         });
     }
 
-    updateButtonStates() {
-        const expectedStep = this.gameState.expectedSequence[this.gameState.currentStepIndex];
-        const isClosetPhase = this.gameState.currentStepIndex >= this.gameState.expectedSequence.length;
-
-        this.buttons.forEach(btn => {
-            const action = btn.getAttribute('data-action');
-
-            // Buttons like reset or inside the closet shouldn't be disabled based on sequence
-            if (action === 'reset' || action.startsWith('puton-') || action === 'finish') {
-                btn.disabled = false;
-                return;
-            }
-
-            const stepIndex = this.gameState.expectedSequence.indexOf(action);
-
-            if (isClosetPhase) {
-                // If we are in closet phase, only old actions or reset work
-                 btn.disabled = false;
-            } else if (stepIndex !== -1) {
-                if (stepIndex > this.gameState.currentStepIndex) {
-                    btn.disabled = true; // Future steps disabled
-                } else {
-                    btn.disabled = false; // Current or past steps enabled
-                }
-            }
-        });
-    }
-
     handleStateChange(event, data, state) {
         switch (event) {
             case 'scoreUpdated':
                 this.updateScore(state.score, data.amount);
-                break;
-            case 'progressUpdated':
-                if (this.progressBar) {
-                    this.progressBar.style.width = `${data.progress * 100}%`;
-                }
-                this.updateButtonStates();
                 break;
             case 'processingChanged':
                 this.toggleProcessing(data);
@@ -197,14 +130,11 @@ export class UIManager {
             case 'itemEquipped':
                 this.handleEquip(data);
                 break;
-            case 'perfectComboAchieved':
-                this.handlePerfectCombo();
-                break;
             case 'gameOver':
                 this.handleGameOver();
                 break;
             case 'gameReset':
-                location.reload();
+                location.reload(); // Quickest way to reset UI correctly since initial styles are in CSS
                 break;
         }
     }
@@ -214,11 +144,12 @@ export class UIManager {
         this.showScorePopup(amount);
     }
 
-    showScorePopup(amount, customText) {
+    showScorePopup(amount) {
         const popup = document.createElement('div');
         popup.className = 'score-popup';
-        popup.innerText = customText || `+${amount}`;
+        popup.innerText = `+${amount}`;
 
+        // Randomize position slightly
         const left = 50 + Math.random() * 50;
         const top = 100 + Math.random() * 50;
 
@@ -236,29 +167,32 @@ export class UIManager {
 
     toggleProcessing(isProcessing) {
         this.gameContainer.classList.toggle('is-processing', isProcessing);
-        if (isProcessing) {
-            this.buttons.forEach(btn => btn.disabled = true);
-        } else {
-            this.updateButtonStates(); // Re-evaluate enabled/disabled state based on logic
-        }
+        this.buttons.forEach(btn => {
+            btn.disabled = isProcessing;
+        });
     }
 
     handleWashStep(stepId) {
-        this.char.className = ''; // reset classes for dynamic states
-        this.char.style.background = "#ffe4e1";
-        this.char.style.boxShadow = "none";
+        // Reset glowing if it's a different action
+        if (stepId !== 'glow') {
+            this.char.classList.remove('glowing');
+        }
 
         switch (stepId) {
             case 'soap':
                 this.msg.innerText = "손가락으로 보들보들~ 비누칠을 해요.";
-                this.char.classList.add('state-soap');
+                this.char.style.background = "#ffffff";
+                this.char.style.boxShadow = "none";
                 break;
             case 'water':
                 this.msg.innerText = "물로 칙칙! 깨끗하게 씻어내요.";
-                this.char.classList.add('state-water');
+                this.char.style.background = "#e0f0ff";
+                this.char.style.boxShadow = "none";
                 break;
             case 'towel':
                 this.msg.innerText = "수건으로 다이 다이 톡톡톡 닦아주기!";
+                this.char.style.background = "#ffe4e1";
+                this.char.style.boxShadow = "none";
                 break;
             case 'lotion':
                 this.msg.innerText = "아빠가 로션을 부드럽게 발라줄게~";
@@ -266,7 +200,9 @@ export class UIManager {
                 break;
             case 'hair':
                 this.msg.innerText = "따뜻한 바람으로 머리를 말려요. 윙~";
+                // Add a small shake animation to character
                 this.char.classList.add('shake');
+                setTimeout(() => this.char.classList.remove('shake'), 500);
                 break;
             case 'glow':
                 this.msg.innerText = "누가 누가 더 오래, 더 밝게 빛나나 보자!";
@@ -276,20 +212,19 @@ export class UIManager {
     }
 
     handleEquip(type) {
+        // 모든 옷 숨기기
         document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
+        // 선택한 옷 보이기
         const item = document.getElementById('item-' + type);
         if (item) {
             item.style.display = 'block';
+
+            // Re-trigger animation
             item.style.animation = 'none';
-            item.offsetHeight;
+            item.offsetHeight; // trigger reflow
             item.style.animation = null;
         }
         this.msg.innerText = type + "을(를) 예쁘게 입었어요!";
-    }
-
-    handlePerfectCombo() {
-        this.showScorePopup(50, "Perfect! +50");
-        this.gameContainer.classList.add('perfect-celebration');
     }
 
     handleGameOver() {
@@ -298,13 +233,6 @@ export class UIManager {
 
         const overlay = document.getElementById('game-over-overlay');
         if (overlay) overlay.classList.add('show');
-
-        if(this.gameState.perfectCombo) {
-             const overlayContent = document.createElement('div');
-             overlayContent.className = 'celebration-text';
-             overlayContent.innerText = '🎉 Perfect Routine! 🎉';
-             overlay.appendChild(overlayContent);
-        }
     }
 }
 
