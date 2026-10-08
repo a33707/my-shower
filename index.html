@@ -85,27 +85,69 @@
             position: relative; 
             background: radial-gradient(circle at center, #ffffff 0%, #f7f9fc 100%);
         }
+
+        /* 캐릭터 해부학 구조 (머리 + 몸통) */
         #character { 
-            width: 150px; 
-            height: 240px; 
-            background: #ffe4e1; 
-            border-radius: 75px 75px 25px 25px; 
+            width: 140px; 
+            height: 280px; 
             position: relative; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border: 3px solid #ffb6c1; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.4s ease;
         }
         #character.glowing { 
-            box-shadow: 0 0 40px #ffd700, inset 0 0 20px #fff; 
-            border: 4px solid #ffd700; 
-            transform: scale(1.03);
+            filter: drop-shadow(0 0 20px #ffd700);
         }
-        .eyes { position: absolute; top: 40px; width: 100%; display: flex; justify-content: space-around; padding: 0 32px; box-sizing: border-box; }
-        .eye { width: 15px; height: 15px; background: #333; border-radius: 50%; position: relative; }
-        .eye::after { content: ''; position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; background: white; border-radius: 50%; }
+
+        #head {
+            width: 110px;
+            height: 110px;
+            background: #ffe4e1;
+            border-radius: 50%;
+            position: relative;
+            border: 3px solid #ffb6c1;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            z-index: 2;
+        }
+        .eyes { position: absolute; top: 38px; width: 100%; display: flex; justify-content: space-around; padding: 0 22px; box-sizing: border-box; }
+        .eye { width: 14px; height: 14px; background: #333; border-radius: 50%; position: relative; }
+        .eye::after { content: ''; position: absolute; top: 2px; right: 2px; width: 4px; height: 4px; background: white; border-radius: 50%; }
         
-        .blush { position: absolute; top: 65px; width: 100%; display: flex; justify-content: space-between; padding: 0 22px; box-sizing: border-box; opacity: 0.6; }
-        .cheek { width: 16px; height: 9px; background: #ff9999; border-radius: 50%; }
+        .blush { position: absolute; top: 60px; width: 100%; display: flex; justify-content: space-between; padding: 0 16px; box-sizing: border-box; opacity: 0.6; }
+        .cheek { width: 15px; height: 8px; background: #ff9999; border-radius: 50%; }
+
+        #torso {
+            width: 90px;
+            height: 120px;
+            background: #ffe4e1;
+            border-radius: 20px 20px 35px 35px;
+            position: relative;
+            margin-top: -10px;
+            border: 3px solid #ffb6c1;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 옷 아이템 (몸통에 정확히 입혀지도록 위치 조정) */
+        .clothes-item { 
+            position: absolute; 
+            top: 95px; 
+            width: 130px; 
+            height: 150px; 
+            display: none; 
+            pointer-events: none; 
+            text-align: center; 
+            font-size: 90px; 
+            z-index: 5;
+            animation: dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes dropOn {
+            0% { transform: translateY(-50px) scale(0.6); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
 
         #ui { 
             background: #fafafa; 
@@ -131,8 +173,6 @@
         button:active { transform: translateY(2px); box-shadow: 0 1px 0 #c2e0ff; }
         button:disabled { background: #ddd; color: #888; box-shadow: none; cursor: default; transform: none; }
 
-        .clothes-item { position: absolute; top: 90px; width: 150px; height: 150px; display: none; pointer-events: none; text-align: center; font-size: 80px; z-index: 5; }
-        
         /* 옷장 모달 */
         #closet { 
             display: none; 
@@ -164,14 +204,18 @@
     
     <div id="screen">
         <div id="character">
-            <div class="blush"><div class="cheek"></div><div class="cheek"></div></div>
-            <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+            <div id="head">
+                <div class="blush"><div class="cheek"></div><div class="cheek"></div></div>
+                <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+            </div>
+            <div id="torso"></div>
         </div>
+        <!-- 실제 몸에 맞는 옷 아이콘 및 비주얼 -->
         <div id="item-panties" class="clothes-item">🩲</div>
-        <div id="item-top" class="clothes-item">👕</div>
+        <div id="item-top" class="clothes-item">👚</div>
         <div id="item-bottom" class="clothes-item">👖</div>
         <div id="item-dress" class="clothes-item">👗</div>
-        <div id="item-pajamas" class="clothes-item">✨🌙</div>
+        <div id="item-pajamas" class="clothes-item">👘</div>
     </div>
     
     <div id="ui">
@@ -190,10 +234,10 @@
     <h3>어떤 옷을 입을까?</h3>
     <div class="closet-grid">
         <button onclick="putOn('panties')">🩲 팬티</button>
-        <button onclick="putOn('top')">👕 상의</button>
-        <button onclick="putOn('bottom')">👖 하의</button>
+        <button onclick="putOn('top')">👚 상의</button>
+        <button onclick="putOn('bottom')">👖 바지</button>
         <button onclick="putOn('dress')">👗 드레스</button>
-        <button onclick="putOn('pajamas')">🌙 잠옷</button>
+        <button onclick="putOn('pajamas')">👘 잠옷</button>
     </div>
     <button onclick="finishGame()" style="width:100%; background:linear-gradient(to right, #ff69b4, #ff1493); color:white; box-shadow:0 4px 0 #c71585;">지퍼 쫙! 완성 완료! 🎉</button>
 </div>
@@ -233,8 +277,8 @@
     function stepSoap() {
         playSound();
         msg.innerText = "뽀득뽀득~ 보들보들 거품 비누칠을 해요! 🫧";
-        char.style.background = "#ffffff";
-        char.style.boxShadow = "0 0 25px rgba(255,255,255,0.8)";
+        document.getElementById('head').style.background = "#ffffff";
+        document.getElementById('torso').style.background = "#ffffff";
         updateProgress(1, "비누칠");
         document.getElementById('btn-water').disabled = false;
         document.getElementById('btn-soap').disabled = true;
@@ -243,8 +287,8 @@
     function stepWater() {
         playSound();
         msg.innerText = "따뜻한 샤워기로 촤르르~ 깨끗하게 헹궈요! 🚿";
-        char.style.background = "#e0f0ff";
-        char.style.boxShadow = "0 10px 20px rgba(0,0,0,0.05)";
+        document.getElementById('head').style.background = "#e0f0ff";
+        document.getElementById('torso').style.background = "#e0f0ff";
         updateProgress(2, "물 헹굼");
         document.getElementById('btn-towel').disabled = false;
         document.getElementById('btn-water').disabled = true;
@@ -253,7 +297,8 @@
     function stepTowel() {
         playSound();
         msg.innerText = "보송보송 수건으로 토닥토닥 물기를 닦아요! 🧺";
-        char.style.background = "#fff0f5";
+        document.getElementById('head').style.background = "#ffe4e1";
+        document.getElementById('torso').style.background = "#ffe4e1";
         updateProgress(3, "수건 닦기");
         document.getElementById('btn-lotion').disabled = false;
         document.getElementById('btn-towel').disabled = true;
@@ -262,7 +307,6 @@
     function stepLotion() {
         playSound();
         msg.innerText = "촉촉하고 향기로운 아빠 로션을 듬뿍 발라요! 🧴";
-        char.style.boxShadow = "inset 0 0 25px rgba(255,182,193,0.8)";
         updateProgress(4, "로션 바르기");
         document.getElementById('btn-hair').disabled = false;
         document.getElementById('btn-lotion').disabled = true;
@@ -294,11 +338,17 @@
         playSound();
         document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
         const item = document.getElementById('item-' + type);
-        if(item) item.style.display = 'block';
+        if(item) {
+            item.style.display = 'block';
+            // 재렌더링으로 애니메이션 리셋
+            item.style.animation = 'none';
+            item.offsetHeight; /* trigger reflow */
+            item.style.animation = 'dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+        }
         msg.innerText = type === 'panties' ? "귀여운 팬티를 입었어요! 🩲" :
-                        type === 'top' ? "예쁜 상의를 입었어요! 👕" :
+                        type === 'top' ? "예쁜 상의를 입었어요! 👚" :
                         type === 'bottom' ? "멋진 바지를 입었어요! 👖" :
-                        type === 'dress' ? "공주님 드레스를 입었어요! 👗" : "포근한 잠옷을 입었어요! 🌙";
+                        type === 'dress' ? "공주님 드레스를 입었어요! 👗" : "포근한 잠옷을 입었어요! 👘";
     }
 
     function finishGame() {
