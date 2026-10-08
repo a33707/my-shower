@@ -151,30 +151,19 @@
             justify-content: center;
         }
 
-        /* 실제 몸에 자연스럽게 입혀지는 의상 스타일링 */
+        /* SVG 의상 그래픽이 몸통에 정확히 착용되도록 위치 및 애니메이션 설정 */
         .clothes-item { 
             position: absolute; 
-            top: 105px; 
-            width: 96px; 
-            height: 120px; 
+            top: 115px; /* 얼굴을 완전히 피해서 몸통 위치에 정확히 안착 */
+            width: 100px; 
+            height: 125px; 
             display: none; 
             pointer-events: none; 
-            text-align: center; 
             z-index: 5;
-            border-radius: 15px 15px 30px 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 50px;
             animation: dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-
-        #item-panties { background: rgba(255, 182, 193, 0.85); border: 2px dashed #ff1493; }
-        #item-top { background: rgba(255, 105, 180, 0.85); border: 2px solid #ff1493; }
-        #item-bottom { background: rgba(135, 206, 250, 0.85); border: 2px solid #4682b4; }
-        #item-dress { background: rgba(221, 160, 221, 0.9); border: 2px solid #ba55d3; width: 110px; height: 135px; top: 100px; left: calc(50% - 55px); }
-        #item-pajamas { background: rgba(152, 251, 152, 0.85); border: 2px solid #3cb371; }
 
         @keyframes dropOn {
             0% { transform: translateY(-50px) scale(0.6); opacity: 0; }
@@ -255,11 +244,53 @@
             </div>
             <div id="torso"></div>
         </div>
-        <div id="item-panties" class="clothes-item">🩲</div>
-        <div id="item-top" class="clothes-item">👚</div>
-        <div id="item-bottom" class="clothes-item">👖</div>
-        <div id="item-dress" class="clothes-item">👗</div>
-        <div id="item-pajamas" class="clothes-item">👘</div>
+
+        <!-- SVG 벡터 의상 그래픽 (얼굴을 가리지 않고 몸통에 자연스럽게 입혀짐) -->
+        <!-- 1. 팬티 -->
+        <div id="item-panties" class="clothes-item">
+            <svg width="90" height="60" viewBox="0 0 90 60">
+                <path d="M 10 10 Q 45 0 80 10 L 85 40 Q 45 55 5 40 Z" fill="#ffb6c1" stroke="#ff1493" stroke-width="2"/>
+                <circle cx="30" cy="25" r="4" fill="#ff1493" opacity="0.6"/>
+                <circle cx="60" cy="25" r="4" fill="#ff1493" opacity="0.6"/>
+            </svg>
+        </div>
+
+        <!-- 2. 상의 -->
+        <div id="item-top" class="clothes-item" style="width: 104px; height: 90px; top: 120px;">
+            <svg width="104" height="90" viewBox="0 0 104 90">
+                <path d="M 20 10 L 4 30 L 22 45 L 22 85 L 82 85 L 82 45 L 100 30 L 84 10 Q 52 20 20 10 Z" fill="#ff69b4" stroke="#c71585" stroke-width="2.5"/>
+                <circle cx="52" cy="35" r="6" fill="#fff" opacity="0.8"/>
+                <circle cx="52" cy="55" r="6" fill="#fff" opacity="0.8"/>
+            </svg>
+        </div>
+
+        <!-- 3. 바지 -->
+        <div id="item-bottom" class="clothes-item" style="width: 90px; height: 80px; top: 160px;">
+            <svg width="90" height="80" viewBox="0 0 90 80">
+                <path d="M 5 5 L 85 5 L 80 75 L 50 75 L 45 35 L 40 75 L 10 75 Z" fill="#4682b4" stroke="#27408b" stroke-width="2.5"/>
+                <line x1="45" y1="35" x2="45" y2="75" stroke="#27408b" stroke-width="2.5"/>
+            </svg>
+        </div>
+
+        <!-- 4. 드레스 -->
+        <div id="item-dress" class="clothes-item" style="width: 120px; height: 130px; top: 115px; left: calc(50% - 60px);">
+            <svg width="120" height="130" viewBox="0 0 120 130">
+                <path d="M 35 5 L 15 25 L 35 40 L 10 125 L 110 125 L 85 40 L 105 25 L 85 5 Q 60 15 35 5 Z" fill="#da70d6" stroke="#8b008b" stroke-width="2.5"/>
+                <path d="M 35 40 Q 60 55 85 40" fill="none" stroke="#ffffe0" stroke-width="4"/>
+                <circle cx="60" cy="70" r="5" fill="#ffffe0"/>
+                <circle cx="60" cy="95" r="5" fill="#ffffe0"/>
+            </svg>
+        </div>
+
+        <!-- 5. 잠옷 -->
+        <div id="item-pajamas" class="clothes-item" style="width: 104px; height: 115px; top: 120px;">
+            <svg width="104" height="115" viewBox="0 0 104 115">
+                <path d="M 22 5 L 5 25 L 25 40 L 22 110 L 82 110 L 79 40 L 99 25 L 82 5 Q 52 15 22 5 Z" fill="#3cb371" stroke="#006400" stroke-width="2.5"/>
+                <text x="35" y="55" font-size="16">⭐</text>
+                <text x="60" y="85" font-size="14">🌙</text>
+                <text x="38" y="90" font-size="14">⭐</text>
+            </svg>
+        </div>
     </div>
     
     <div id="ui">
@@ -337,7 +368,6 @@
     function handleInteractionMove(e) {
         if (!activeStep) return;
         
-        // 문지르는 횟수를 늘려서(1.8증가 -> 약 55번 드래그 필요) 충분히 인지하고 즐길 수 있도록 조정
         scrubProgress += 1.8;
         if (scrubProgress > 100) scrubProgress = 100;
         scrubFill.style.width = scrubProgress + '%';
@@ -441,7 +471,7 @@
 
     function putOn(type) {
         playSound(783.99);
-        // 모든 옷 숨기기
+        document.querySelectorAll('.clothes-item').fileList = 'none'; // reset
         document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
         const item = document.getElementById('item-' + type);
         if(item) {
