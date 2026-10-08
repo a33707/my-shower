@@ -18,7 +18,8 @@
             margin: 0; 
             padding: 10px; 
             box-sizing: border-box;
-            touch-action: manipulation;
+            touch-action: none;
+            user-select: none;
         }
         #game-container { 
             background: white; 
@@ -56,7 +57,7 @@
             width: 0%;
             height: 100%;
             background: linear-gradient(to right, #ff69b4, #ff1493);
-            transition: width 0.4s ease;
+            transition: width 0.3s ease;
         }
 
         #message { 
@@ -76,6 +77,24 @@
             box-sizing: border-box;
         }
 
+        /* 문지르기 게이지바 스타일 */
+        #scrub-gauge-box {
+            width: 80%;
+            height: 14px;
+            background: #f0f0f0;
+            border-radius: 7px;
+            margin: 8px auto 0 auto;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            display: none;
+        }
+        #scrub-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, #00c9ff, #92fe9d);
+            transition: width 0.1s ease;
+        }
+
         #screen { 
             flex: 1; 
             display: flex; 
@@ -84,9 +103,9 @@
             justify-content: center; 
             position: relative; 
             background: radial-gradient(circle at center, #ffffff 0%, #f7f9fc 100%);
+            cursor: pointer;
         }
 
-        /* 캐릭터 해부학 구조 (머리 + 몸통) */
         #character { 
             width: 140px; 
             height: 280px; 
@@ -94,7 +113,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.4s ease;
+            transition: transform 0.1s ease;
+        }
+        #character.rubbing {
+            transform: scale(1.02) rotate(1deg);
         }
         #character.glowing { 
             filter: drop-shadow(0 0 20px #ffd700);
@@ -130,7 +152,18 @@
             justify-content: center;
         }
 
-        /* 옷 아이템 (몸통에 정확히 입혀지도록 위치 조정) */
+        .bubble-effect {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 6;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+
         .clothes-item { 
             position: absolute; 
             top: 95px; 
@@ -143,7 +176,6 @@
             z-index: 5;
             animation: dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-
         @keyframes dropOn {
             0% { transform: translateY(-50px) scale(0.6); opacity: 0; }
             100% { transform: translateY(0) scale(1); opacity: 1; }
@@ -200,9 +232,10 @@
         <span id="step-title">목욕 단계 1/6</span>
         <div class="progress-bar-container"><div id="progress-fill"></div></div>
     </div>
-    <div id="message">안녕! 우리 같이 깨끗하게 씻고 옷 입을까?</div>
+    <div id="message">버튼을 누르고 캐릭터를 **문질러서** 씻겨주세요!</div>
+    <div id="scrub-gauge-box"><div id="scrub-fill"></div></div>
     
-    <div id="screen">
+    <div id="screen" id="screen-area">
         <div id="character">
             <div id="head">
                 <div class="blush"><div class="cheek"></div><div class="cheek"></div></div>
@@ -210,7 +243,6 @@
             </div>
             <div id="torso"></div>
         </div>
-        <!-- 실제 몸에 맞는 옷 아이콘 및 비주얼 -->
         <div id="item-panties" class="clothes-item">🩲</div>
         <div id="item-top" class="clothes-item">👚</div>
         <div id="item-bottom" class="clothes-item">👖</div>
@@ -219,11 +251,11 @@
     </div>
     
     <div id="ui">
-        <button id="btn-soap" onclick="stepSoap()">🧼 비누칠</button>
-        <button id="btn-water" onclick="stepWater()" disabled>🚿 물 헹굼</button>
-        <button id="btn-towel" onclick="stepTowel()" disabled>🧺 수건 톡톡</button>
-        <button id="btn-lotion" onclick="stepLotion()" disabled>🧴 보습 로션</button>
-        <button id="btn-hair" onclick="stepHair()" disabled>💨 머리 말리기</button>
+        <button id="btn-soap" onclick="startStep('soap', '🧼 비누칠을 시작해요! 캐릭터를 문질러 거품을 내세요!')">🧼 비누칠</button>
+        <button id="btn-water" onclick="startStep('water', '🚿 샤워기로 거품을 싹 씻어내세요!')" disabled>🚿 물 헹굼</button>
+        <button id="btn-towel" onclick="startStep('towel', '🧺 수건으로 토닥토닥 물기를 닦아주세요!')" disabled>🧺 수건 톡톡</button>
+        <button id="btn-lotion" onclick="startStep('lotion', '🧴 로션을 문질러 부드럽게 발라주세요!')" disabled>🧴 보습 로션</button>
+        <button id="btn-hair" onclick="startStep('hair', '💨 드라이기로 머리를 슥슥 말려주세요!')" disabled>💨 머리 말리기</button>
         <button id="btn-glow" onclick="stepGlow()" disabled>⭐ 반짝 반짝</button>
         <button id="btn-closet" onclick="showCloset()" disabled>👗 옷 입히기</button>
         <button onclick="resetGame()" style="background:#eee; box-shadow:0 4px 0 #ddd; color:#666;">🔄 처음부터</button>
@@ -247,9 +279,14 @@
     const char = document.getElementById('character');
     const progressFill = document.getElementById('progress-fill');
     const stepTitle = document.getElementById('step-title');
+    const scrubGaugeBox = document.getElementById('scrub-gauge-box');
+    const scrubFill = document.getElementById('scrub-fill');
     
     let currentStep = 1;
     const totalSteps = 6;
+    let activeStep = null; // 'soap', 'water', 'towel', 'lotion', 'hair'
+    let scrubProgress = 0;
+    let isInteracting = false;
 
     function updateProgress(step, title) {
         currentStep = step;
@@ -257,15 +294,15 @@
         progressFill.style.width = `${(step / totalSteps) * 100}%`;
     }
 
-    function playSound() {
+    function playSound(freq = 587.33) {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(freq * 1.5, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -274,54 +311,113 @@
         } catch(e) {}
     }
 
-    function stepSoap() {
-        playSound();
-        msg.innerText = "뽀득뽀득~ 보들보들 거품 비누칠을 해요! 🫧";
-        document.getElementById('head').style.background = "#ffffff";
-        document.getElementById('torso').style.background = "#ffffff";
-        updateProgress(1, "비누칠");
-        document.getElementById('btn-water').disabled = false;
-        document.getElementById('btn-soap').disabled = true;
+    function startStep(stepName, instructionText) {
+        activeStep = stepName;
+        scrubProgress = 0;
+        scrubFill.style.width = '0%';
+        scrubGaugeBox.style.display = 'block';
+        msg.innerText = instructionText;
+        playSound(440);
     }
 
-    function stepWater() {
-        playSound();
-        msg.innerText = "따뜻한 샤워기로 촤르르~ 깨끗하게 헹궈요! 🚿";
-        document.getElementById('head').style.background = "#e0f0ff";
-        document.getElementById('torso').style.background = "#e0f0ff";
-        updateProgress(2, "물 헹굼");
-        document.getElementById('btn-towel').disabled = false;
-        document.getElementById('btn-water').disabled = true;
+    // 문지르기(스크럽) 인터랙션 로직
+    const screenArea = document.getElementById('screen');
+
+    function handleInteractionMove(e) {
+        if (!activeStep) return;
+        
+        // 문지를 때마다 게이지 상승 (총 15번 문지르면 100%)
+        scrubProgress += 7;
+        if (scrubProgress > 100) scrubProgress = 100;
+        scrubFill.style.width = scrubProgress + '%';
+
+        // 시각적 효과 (캐릭터 흔들림 및 거품/효과 생성)
+        char.classList.add('rubbing');
+        setTimeout(() => char.classList.remove('rubbing'), 100);
+
+        // 마우스/터치 위치에 이펙트 생성
+        const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+        if (clientX && clientY) {
+            createEffectParticle(clientX, clientY);
+        }
+
+        if (scrubProgress >= 100) {
+            completeActiveStep();
+        }
     }
 
-    function stepTowel() {
-        playSound();
-        msg.innerText = "보송보송 수건으로 토닥토닥 물기를 닦아요! 🧺";
-        document.getElementById('head').style.background = "#ffe4e1";
-        document.getElementById('torso').style.background = "#ffe4e1";
-        updateProgress(3, "수건 닦기");
-        document.getElementById('btn-lotion').disabled = false;
-        document.getElementById('btn-towel').disabled = true;
+    screenArea.addEventListener('mousemove', (e) => {
+        if (isInteracting) handleInteractionMove(e);
+    });
+    screenArea.addEventListener('mousedown', () => isInteracting = true);
+    window.addEventListener('mouseup', () => isInteracting = false);
+
+    screenArea.addEventListener('touchmove', (e) => {
+        if (isInteracting) handleInteractionMove(e.touches[0]);
+    }, { passive: true });
+    screenArea.addEventListener('touchstart', () => isInteracting = true);
+    window.addEventListener('touchend', () => isInteracting = false);
+
+    function createEffectParticle(x, y) {
+        const p = document.createElement('div');
+        p.className = 'bubble-effect';
+        const rect = screenArea.getBoundingClientRect();
+        p.style.left = (x - rect.left) + 'px';
+        p.style.top = (y - rect.top) + 'px';
+        
+        if (activeStep === 'soap') p.innerText = '🫧';
+        else if (activeStep === 'water') p.innerText = '💦';
+        else if (activeStep === 'towel') p.innerText = '✨';
+        else if (activeStep === 'lotion') p.innerText = '💧';
+        else if (activeStep === 'hair') p.innerText = '💨';
+
+        screenArea.appendChild(p);
+        setTimeout(() => p.remove(), 600);
     }
 
-    function stepLotion() {
-        playSound();
-        msg.innerText = "촉촉하고 향기로운 아빠 로션을 듬뿍 발라요! 🧴";
-        updateProgress(4, "로션 바르기");
-        document.getElementById('btn-hair').disabled = false;
-        document.getElementById('btn-lotion').disabled = true;
-    }
+    function completeActiveStep() {
+        playSound(880);
+        scrubGaugeBox.style.display = 'none';
+        const step = activeStep;
+        activeStep = null;
 
-    function stepHair() {
-        playSound();
-        msg.innerText = "따뜻한 바람으로 머리를 뽀송하게 말려요. 윙~ 💨";
-        updateProgress(5, "머리 말리기");
-        document.getElementById('btn-glow').disabled = false;
-        document.getElementById('btn-hair').disabled = true;
+        if (step === 'soap') {
+            msg.innerText = "뽀득뽀득 거품이 가득해요! 이제 물로 헹궈주세요. 🚿";
+            document.getElementById('head').style.background = "#ffffff";
+            document.getElementById('torso').style.background = "#ffffff";
+            updateProgress(1, "비누칠 완료");
+            document.getElementById('btn-water').disabled = false;
+            document.getElementById('btn-soap').disabled = true;
+        } else if (step === 'water') {
+            msg.innerText = "깨끗하게 헹궈졌어요! 수건으로 닦아주세요. 🧺";
+            document.getElementById('head').style.background = "#e0f0ff";
+            document.getElementById('torso').style.background = "#e0f0ff";
+            updateProgress(2, "물 헹굼 완료");
+            document.getElementById('btn-towel').disabled = false;
+            document.getElementById('btn-water').disabled = true;
+        } else if (step === 'towel') {
+            msg.innerText = "보송보송 닦였어요! 로션을 발라주세요. 🧴";
+            document.getElementById('head').style.background = "#fff0f5";
+            document.getElementById('torso').style.background = "#fff0f5";
+            updateProgress(3, "수건 닦기 완료");
+            document.getElementById('btn-lotion').disabled = false;
+            document.getElementById('btn-towel').disabled = true;
+        } else if (step === 'lotion') {
+            msg.innerText = "촉촉해요! 이제 머리를 말려주세요. 💨";
+            updateProgress(4, "로션 바르기 완료");
+            document.getElementById('btn-hair').disabled = false;
+            document.getElementById('btn-lotion').disabled = true;
+        } else if (step === 'hair') {
+            msg.innerText = "머리가 뽀송하게 말랐어요! 빛내기 버튼을 누르세요. ⭐";
+            updateProgress(5, "머리 말리기 완료");
+            document.getElementById('btn-glow').disabled = false;
+            document.getElementById('btn-hair').disabled = true;
+        }
     }
 
     function stepGlow() {
-        playSound();
+        playSound(987.77);
         msg.innerText = "반짝반짝 세상에서 제일 예쁘고 빛나는 우리 아이! ⭐";
         char.classList.add('glowing');
         updateProgress(6, "빛내기 완료");
@@ -330,19 +426,18 @@
     }
 
     function showCloset() {
-        playSound();
+        playSound(659.25);
         document.getElementById('closet').style.display = 'block';
     }
 
     function putOn(type) {
-        playSound();
+        playSound(783.99);
         document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
         const item = document.getElementById('item-' + type);
         if(item) {
             item.style.display = 'block';
-            // 재렌더링으로 애니메이션 리셋
             item.style.animation = 'none';
-            item.offsetHeight; /* trigger reflow */
+            item.offsetHeight;
             item.style.animation = 'dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
         }
         msg.innerText = type === 'panties' ? "귀여운 팬티를 입었어요! 🩲" :
@@ -352,7 +447,7 @@
     }
 
     function finishGame() {
-        playSound();
+        playSound(1046.50);
         document.getElementById('closet').style.display = 'none';
         msg.innerText = "지퍼를 쫙~! 목욕도 하고 옷도 다 입었어요! 참 잘했어요! 🎉";
         progressFill.style.width = "100%";
