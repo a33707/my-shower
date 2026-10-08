@@ -77,7 +77,6 @@
             box-sizing: border-box;
         }
 
-        /* 문지르기 게이지바 스타일 */
         #scrub-gauge-box {
             width: 80%;
             height: 14px;
@@ -152,6 +151,36 @@
             justify-content: center;
         }
 
+        /* 실제 몸에 자연스럽게 입혀지는 의상 스타일링 */
+        .clothes-item { 
+            position: absolute; 
+            top: 105px; 
+            width: 96px; 
+            height: 120px; 
+            display: none; 
+            pointer-events: none; 
+            text-align: center; 
+            z-index: 5;
+            border-radius: 15px 15px 30px 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            animation: dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        #item-panties { background: rgba(255, 182, 193, 0.85); border: 2px dashed #ff1493; }
+        #item-top { background: rgba(255, 105, 180, 0.85); border: 2px solid #ff1493; }
+        #item-bottom { background: rgba(135, 206, 250, 0.85); border: 2px solid #4682b4; }
+        #item-dress { background: rgba(221, 160, 221, 0.9); border: 2px solid #ba55d3; width: 110px; height: 135px; top: 100px; left: calc(50% - 55px); }
+        #item-pajamas { background: rgba(152, 251, 152, 0.85); border: 2px solid #3cb371; }
+
+        @keyframes dropOn {
+            0% { transform: translateY(-50px) scale(0.6); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
         .bubble-effect {
             position: absolute;
             font-size: 24px;
@@ -162,23 +191,6 @@
         @keyframes floatUp {
             0% { transform: translateY(0) scale(0.5); opacity: 1; }
             100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
-        }
-
-        .clothes-item { 
-            position: absolute; 
-            top: 95px; 
-            width: 130px; 
-            height: 150px; 
-            display: none; 
-            pointer-events: none; 
-            text-align: center; 
-            font-size: 90px; 
-            z-index: 5;
-            animation: dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        @keyframes dropOn {
-            0% { transform: translateY(-50px) scale(0.6); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         #ui { 
@@ -232,7 +244,7 @@
         <span id="step-title">목욕 단계 1/6</span>
         <div class="progress-bar-container"><div id="progress-fill"></div></div>
     </div>
-    <div id="message">버튼을 누르고 캐릭터를 **문질러서** 씻겨주세요!</div>
+    <div id="message">버튼을 누르고 캐릭터를 **충분히 문질러서** 씻겨주세요!</div>
     <div id="scrub-gauge-box"><div id="scrub-fill"></div></div>
     
     <div id="screen" id="screen-area">
@@ -251,11 +263,11 @@
     </div>
     
     <div id="ui">
-        <button id="btn-soap" onclick="startStep('soap', '🧼 비누칠을 시작해요! 캐릭터를 문질러 거품을 내세요!')">🧼 비누칠</button>
-        <button id="btn-water" onclick="startStep('water', '🚿 샤워기로 거품을 싹 씻어내세요!')" disabled>🚿 물 헹굼</button>
-        <button id="btn-towel" onclick="startStep('towel', '🧺 수건으로 토닥토닥 물기를 닦아주세요!')" disabled>🧺 수건 톡톡</button>
-        <button id="btn-lotion" onclick="startStep('lotion', '🧴 로션을 문질러 부드럽게 발라주세요!')" disabled>🧴 보습 로션</button>
-        <button id="btn-hair" onclick="startStep('hair', '💨 드라이기로 머리를 슥슥 말려주세요!')" disabled>💨 머리 말리기</button>
+        <button id="btn-soap" onclick="startStep('soap', '🧼 비누칠 중! 캐릭터 몸을 구석구석 오래 문질러주세요!')">🧼 비누칠</button>
+        <button id="btn-water" onclick="startStep('water', '🚿 샤워기로 거품을 꼼꼼히 씻어내세요!')" disabled>🚿 물 헹굼</button>
+        <button id="btn-towel" onclick="startStep('towel', '🧺 수건으로 부드럽게 물기를 닦아주세요!')" disabled>🧺 수건 톡톡</button>
+        <button id="btn-lotion" onclick="startStep('lotion', '🧴 로션을 골고루 문질러 발라주세요!')" disabled>🧴 보습 로션</button>
+        <button id="btn-hair" onclick="startStep('hair', '💨 드라이기로 머리를 꼼꼼히 말려주세요!')" disabled>💨 머리 말리기</button>
         <button id="btn-glow" onclick="stepGlow()" disabled>⭐ 반짝 반짝</button>
         <button id="btn-closet" onclick="showCloset()" disabled>👗 옷 입히기</button>
         <button onclick="resetGame()" style="background:#eee; box-shadow:0 4px 0 #ddd; color:#666;">🔄 처음부터</button>
@@ -284,7 +296,7 @@
     
     let currentStep = 1;
     const totalSteps = 6;
-    let activeStep = null; // 'soap', 'water', 'towel', 'lotion', 'hair'
+    let activeStep = null;
     let scrubProgress = 0;
     let isInteracting = false;
 
@@ -320,22 +332,19 @@
         playSound(440);
     }
 
-    // 문지르기(스크럽) 인터랙션 로직
     const screenArea = document.getElementById('screen');
 
     function handleInteractionMove(e) {
         if (!activeStep) return;
         
-        // 문지를 때마다 게이지 상승 (총 15번 문지르면 100%)
-        scrubProgress += 7;
+        // 문지르는 횟수를 늘려서(1.8증가 -> 약 55번 드래그 필요) 충분히 인지하고 즐길 수 있도록 조정
+        scrubProgress += 1.8;
         if (scrubProgress > 100) scrubProgress = 100;
         scrubFill.style.width = scrubProgress + '%';
 
-        // 시각적 효과 (캐릭터 흔들림 및 거품/효과 생성)
         char.classList.add('rubbing');
-        setTimeout(() => char.classList.remove('rubbing'), 100);
+        setTimeout(() => char.classList.remove('rubbing'), 80);
 
-        // 마우스/터치 위치에 이펙트 생성
         const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
         const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
         if (clientX && clientY) {
@@ -432,15 +441,16 @@
 
     function putOn(type) {
         playSound(783.99);
+        // 모든 옷 숨기기
         document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
         const item = document.getElementById('item-' + type);
         if(item) {
-            item.style.display = 'block';
+            item.style.display = 'flex';
             item.style.animation = 'none';
             item.offsetHeight;
             item.style.animation = 'dropOn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
         }
-        msg.innerText = type === 'panties' ? "귀여운 팬티를 입었어요! 🩲" :
+        msg.innerText = type === 'panties' ? "귀여운 속옷을 입었어요! 🩲" :
                         type === 'top' ? "예쁜 상의를 입었어요! 👚" :
                         type === 'bottom' ? "멋진 바지를 입었어요! 👖" :
                         type === 'dress' ? "공주님 드레스를 입었어요! 👗" : "포근한 잠옷을 입었어요! 👘";
