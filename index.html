@@ -3,16 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<<<<<<< HEAD
     <title>인형 놀이 목욕 게임</title>
     <link rel="stylesheet" href="style.css">
+=======
+    <title>인형 놀이 목욕 & 드레스업 게임</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        
+        body { 
+            font-family: 'Jua', sans-serif; 
+            background: linear-gradient(135deg, #f0f8ff, #ffe4e1); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0; 
+            padding: 10px; 
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+        #game-container { 
+            background: white; 
+            width: 100%;
+            max-width: 380px; 
+            height: 640px; 
+            border-radius: 30px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
+            overflow: hidden; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            border: 4px solid #fff;
+        }
+        #progress-header {
+            background: #fff0f5;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #ffb6c1;
+            font-size: 14px;
+            color: #d66d87;
+        }
+        .progress-bar-container {
+            flex: 1;
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, #ff69b4, #ff1493);
+            transition: width 0.4s ease;
+        }
+
+        #screen { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            background: radial-gradient(circle at center, #ffffff 0%, #f7f9fc 100%);
+        }
+        #character { 
+            width: 160px; 
+            height: 260px; 
+            background: #ffe4e1; 
+            border-radius: 80px 80px 25px 25px; 
+            position: relative; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 3px solid #ffb6c1; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        #character.glowing { 
+            box-shadow: 0 0 40px #ffd700, inset 0 0 20px #fff; 
+            border: 4px solid #ffd700; 
+            transform: scale(1.03);
+        }
+        .eyes { position: absolute; top: 45px; width: 100%; display: flex; justify-content: space-around; padding: 0 35px; box-sizing: border-box; }
+        .eye { width: 16px; height: 16px; background: #333; border-radius: 50%; position: relative; }
+        .eye::after { content: ''; position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; background: white; border-radius: 50%; }
+        
+        .blush { position: absolute; top: 70px; width: 100%; display: flex; justify-content: space-between; padding: 0 25px; box-sizing: border-box; opacity: 0.6; }
+        .cheek { width: 18px; height: 10px; background: #ff9999; border-radius: 50%; }
+
+        #ui { 
+            background: #fafafa; 
+            padding: 12px; 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+            border-top: 2px solid #eee; 
+        }
+        button { 
+            padding: 10px 4px; 
+            font-size: 13px; 
+            font-family: 'Jua', sans-serif;
+            cursor: pointer; 
+            border: none; 
+            border-radius: 14px; 
+            background: #e0f0ff; 
+            color: #444;
+            transition: all 0.2s; 
+            box-shadow: 0 4px 0 #c2e0ff;
+        }
+        button:hover { background: #b3d9ff; transform: translateY(-2px); }
+        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #c2e0ff; }
+        button:disabled { background: #ddd; color: #888; box-shadow: none; cursor: default; transform: none; }
+
+        #message { 
+            position: absolute; 
+            top: 15px; 
+            width: 85%; 
+            background: rgba(255,255,255,0.9); 
+            padding: 10px 15px; 
+            border-radius: 15px; 
+            text-align: center; 
+            font-size: 15px; 
+            font-weight: bold; 
+            color: #d66d87; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border: 2px solid #ffb6c1;
+            z-index: 10;
+        }
+        .clothes-item { position: absolute; top: 110px; width: 160px; height: 160px; display: none; pointer-events: none; text-align: center; font-size: 85px; z-index: 5; }
+        
+        /* 옷장 모달 */
+        #closet { 
+            display: none; 
+            position: fixed; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: white; 
+            padding: 25px; 
+            border-radius: 25px; 
+            border: 3px solid #ff69b4; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            z-index: 100; 
+            text-align: center;
+            width: 280px;
+        }
+        #closet h3 { margin-top: 0; color: #ff1493; }
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .closet-grid button { background: #ffe4e1; box-shadow: 0 4px 0 #ffb6c1; color: #d66d87; font-size: 15px; padding: 12px; }
+    </style>
+>>>>>>> 7c4bc2a (Enhance my-shower game with step tracking, audio effects, and UI polish)
 </head>
 <body>
 
 <div id="game-container">
+<<<<<<< HEAD
     <div id="message">안녕! 우리 같이 깨끗하게 씻고 옷 입을까?</div>
     <div id="score-display">점수: <span id="score">0</span></div>
     <div id="screen">
         <div id="character">
+=======
+    <div id="progress-header">
+        <span id="step-title">목욕 단계 1/5</span>
+        <div class="progress-bar-container"><div id="progress-fill"></div></div>
+    </div>
+    <div id="message">안녕! 우리 같이 깨끗하게 씻고 옷 입을까?</div>
+    
+    <div id="screen">
+        <div id="character">
+            <div class="blush"><div class="cheek"></div><div class="cheek"></div></div>
+>>>>>>> 7c4bc2a (Enhance my-shower game with step tracking, audio effects, and UI polish)
             <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
         </div>
         <div id="item-panties" class="clothes-item">🩲</div>
@@ -23,6 +184,7 @@
     </div>
     
     <div id="ui">
+<<<<<<< HEAD
         <button data-action="soap">🧼 비누칠</button>
         <button data-action="water">🚿 물 칙칙</button>
         <button data-action="towel">🧼 수건 톡톡</button>
@@ -51,3 +213,146 @@
 
 </body>
 </html>
+=======
+        <button id="btn-soap" onclick="stepSoap()">🧼 비누칠</button>
+        <button id="btn-water" onclick="stepWater()" disabled>🚿 물 헹굼</button>
+        <button id="btn-towel" onclick="stepTowel()" disabled>🧺 수건 톡톡</button>
+        <button id="btn-lotion" onclick="stepLotion()" disabled>🧴 보습 로션</button>
+        <button id="btn-hair" onclick="stepHair()" disabled>💨 머리 말리기</button>
+        <button id="btn-glow" onclick="stepGlow()" disabled>⭐ 반짝 반짝</button>
+        <button id="btn-closet" onclick="showCloset()" disabled>👗 옷 입히기</button>
+        <button onclick="resetGame()" style="background:#eee; box-shadow:0 4px 0 #ddd; color:#666;">🔄 처음부터</button>
+    </div>
+</div>
+
+<div id="closet">
+    <h3>어떤 옷을 입을까?</h3>
+    <div class="closet-grid">
+        <button onclick="putOn('panties')">🩲 팬티</button>
+        <button onclick="putOn('top')">👕 상의</button>
+        <button onclick="putOn('bottom')">👖 하의</button>
+        <button onclick="putOn('dress')">👗 드레스</button>
+        <button onclick="putOn('pajamas')">🌙 잠옷</button>
+    </div>
+    <button onclick="finishGame()" style="width:100%; background:linear-gradient(to right, #ff69b4, #ff1493); color:white; box-shadow:0 4px 0 #c71585;">지퍼 쫙! 완성 완료! 🎉</button>
+</div>
+
+<script>
+    const msg = document.getElementById('message');
+    const char = document.getElementById('character');
+    const progressFill = document.getElementById('progress-fill');
+    const stepTitle = document.getElementById('step-title');
+    
+    let currentStep = 1;
+    const totalSteps = 6;
+
+    function updateProgress(step, title) {
+        currentStep = step;
+        stepTitle.innerText = `목욕 단계 ${step}/${totalSteps}`;
+        progressFill.style.width = `${(step / totalSteps) * 100}%`;
+    }
+
+    function playSound() {
+        // 간단한 Web Audio API 사운드 효과
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        } catch(e) {}
+    }
+
+    function stepSoap() {
+        playSound();
+        msg.innerText = "뽀득뽀득~ 보들보들 거품 비누칠을 해요! 🫧";
+        char.style.background = "#ffffff";
+        char.style.boxShadow = "0 0 25px rgba(255,255,255,0.8)";
+        updateProgress(1, "비누칠");
+        document.getElementById('btn-water').disabled = false;
+        document.getElementById('btn-soap').disabled = true;
+    }
+
+    function stepWater() {
+        playSound();
+        msg.innerText = "따뜻한 샤워기로 촤르르~ 깨끗하게 헹궈요! 🚿";
+        char.style.background = "#e0f0ff";
+        char.style.boxShadow = "0 10px 20px rgba(0,0,0,0.05)";
+        updateProgress(2, "물 헹굼");
+        document.getElementById('btn-towel').disabled = false;
+        document.getElementById('btn-water').disabled = true;
+    }
+
+    function stepTowel() {
+        playSound();
+        msg.innerText = "보송보송 수건으로 토닥토닥 물기를 닦아요! 🧺";
+        char.style.background = "#fff0f5";
+        updateProgress(3, "수건 닦기");
+        document.getElementById('btn-lotion').disabled = false;
+        document.getElementById('btn-towel').disabled = true;
+    }
+
+    function stepLotion() {
+        playSound();
+        msg.innerText = "촉촉하고 향기로운 아빠 로션을 듬뿍 발라요! 🧴";
+        char.style.boxShadow = "inset 0 0 25px rgba(255,182,193,0.8)";
+        updateProgress(4, "로션 바르기");
+        document.getElementById('btn-hair').disabled = false;
+        document.getElementById('btn-lotion').disabled = true;
+    }
+
+    function stepHair() {
+        playSound();
+        msg.innerText = "따뜻한 바람으로 머리를 뽀송하게 말려요. 윙~ 💨";
+        updateProgress(5, "머리 말리기");
+        document.getElementById('btn-glow').disabled = false;
+        document.getElementById('btn-hair').disabled = true;
+    }
+
+    function stepGlow() {
+        playSound();
+        msg.innerText = "반짝반짝 세상에서 제일 예쁘고 빛나는 우리 아이! ⭐";
+        char.classList.add('glowing');
+        updateProgress(6, "빛내기 완료");
+        document.getElementById('btn-closet').disabled = false;
+        document.getElementById('btn-glow').disabled = true;
+    }
+
+    function showCloset() {
+        playSound();
+        document.getElementById('closet').style.display = 'block';
+    }
+
+    function putOn(type) {
+        playSound();
+        document.querySelectorAll('.clothes-item').forEach(el => el.style.display = 'none');
+        const item = document.getElementById('item-' + type);
+        if(item) item.style.display = 'block';
+        msg.innerText = type === 'panties' ? "귀여운 팬티를 입었어요! 🩲" :
+                        type === 'top' ? "예쁜 상의를 입었어요! 👕" :
+                        type === 'bottom' ? "멋진 바지를 입었어요! 👖" :
+                        type === 'dress' ? "공주님 드레스를 입었어요! 👗" : "포근한 잠옷을 입었어요! 🌙";
+    }
+
+    function finishGame() {
+        playSound();
+        document.getElementById('closet').style.display = 'none';
+        msg.innerText = "지퍼를 쫙~! 목욕도 하고 옷도 다 입었어요! 참 잘했어요! 🎉";
+        progressFill.style.width = "100%";
+    }
+
+    function resetGame() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
+>>>>>>> 7c4bc2a (Enhance my-shower game with step tracking, audio effects, and UI polish)
