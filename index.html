@@ -3,10 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<<<<<<< HEAD
-    <title>인형 놀이 목욕 게임</title>
-    <link rel="stylesheet" href="style.css">
-=======
     <title>인형 놀이 목욕 & 드레스업 게임</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
@@ -153,17 +149,10 @@
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
         .closet-grid button { background: #ffe4e1; box-shadow: 0 4px 0 #ffb6c1; color: #d66d87; font-size: 15px; padding: 12px; }
     </style>
->>>>>>> 7c4bc2a (Enhance my-shower game with step tracking, audio effects, and UI polish)
 </head>
 <body>
 
 <div id="game-container">
-<<<<<<< HEAD
-    <div id="message">안녕! 우리 같이 깨끗하게 씻고 옷 입을까?</div>
-    <div id="score-display">점수: <span id="score">0</span></div>
-    <div id="screen">
-        <div id="character">
-=======
     <div id="progress-header">
         <span id="step-title">목욕 단계 1/5</span>
         <div class="progress-bar-container"><div id="progress-fill"></div></div>
@@ -173,7 +162,6 @@
     <div id="screen">
         <div id="character">
             <div class="blush"><div class="cheek"></div><div class="cheek"></div></div>
->>>>>>> 7c4bc2a (Enhance my-shower game with step tracking, audio effects, and UI polish)
             <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
         </div>
         <div id="item-panties" class="clothes-item">🩲</div>
@@ -184,36 +172,6 @@
     </div>
     
     <div id="ui">
-<<<<<<< HEAD
-        <button data-action="soap">🧼 비누칠</button>
-        <button data-action="water">🚿 물 칙칙</button>
-        <button data-action="towel">🧼 수건 톡톡</button>
-        <button data-action="lotion">🧴 아빠 로션</button>
-        <button data-action="hair">💨 머리 말리기</button>
-        <button data-action="glow">⭐ 누가 더 빛나나</button>
-        <button data-action="closet">👗 옷 입히기</button>
-        <button data-action="reset">🔄 다시 하기</button>
-    </div>
-
-    <div id="closet">
-        <h3>어떤 옷을 입을까?</h3>
-        <button data-action="puton-panties">🩲 팬티</button>
-        <button data-action="puton-top">👕 상의</button>
-        <button data-action="puton-bottom">👖 하의</button>
-        <button data-action="puton-dress">👗 드레스</button>
-        <button data-action="puton-pajamas">🌙 잠옷</button>
-        <br><br>
-        <button data-action="finish">🤐 지퍼 올리기 (끝!)</button>
-    </div>
-
-    <div class="game-over-overlay" id="game-over-overlay"></div>
-</div>
-
-<script type="module" src="script.js"></script>
-
-</body>
-</html>
-=======
         <button id="btn-soap" onclick="stepSoap()">🧼 비누칠</button>
         <button id="btn-water" onclick="stepWater()" disabled>🚿 물 헹굼</button>
         <button id="btn-towel" onclick="stepTowel()" disabled>🧺 수건 톡톡</button>
@@ -253,13 +211,12 @@
     }
 
     function playSound() {
-        // 간단한 Web Audio API 사운드 효과
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.1, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
@@ -355,4 +312,3 @@
 
 </body>
 </html>
->>>>>>> 7c4bc2a (Enhance my-shower game with step tracking, audio effects, and UI polish)
