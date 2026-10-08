@@ -42,6 +42,7 @@
             border-bottom: 2px dashed #ffb6c1;
             font-size: 14px;
             color: #d66d87;
+            box-sizing: border-box;
         }
         .progress-bar-container {
             flex: 1;
@@ -58,6 +59,23 @@
             transition: width 0.4s ease;
         }
 
+        #message { 
+            position: relative; 
+            margin: 8px auto 0 auto; 
+            width: 90%; 
+            background: rgba(255,255,255,0.95); 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #d66d87; 
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+            border: 2px solid #ffb6c1;
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
         #screen { 
             flex: 1; 
             display: flex; 
@@ -68,10 +86,10 @@
             background: radial-gradient(circle at center, #ffffff 0%, #f7f9fc 100%);
         }
         #character { 
-            width: 160px; 
-            height: 260px; 
+            width: 150px; 
+            height: 240px; 
             background: #ffe4e1; 
-            border-radius: 80px 80px 25px 25px; 
+            border-radius: 75px 75px 25px 25px; 
             position: relative; 
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             border: 3px solid #ffb6c1; 
@@ -82,12 +100,12 @@
             border: 4px solid #ffd700; 
             transform: scale(1.03);
         }
-        .eyes { position: absolute; top: 45px; width: 100%; display: flex; justify-content: space-around; padding: 0 35px; box-sizing: border-box; }
-        .eye { width: 16px; height: 16px; background: #333; border-radius: 50%; position: relative; }
+        .eyes { position: absolute; top: 40px; width: 100%; display: flex; justify-content: space-around; padding: 0 32px; box-sizing: border-box; }
+        .eye { width: 15px; height: 15px; background: #333; border-radius: 50%; position: relative; }
         .eye::after { content: ''; position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; background: white; border-radius: 50%; }
         
-        .blush { position: absolute; top: 70px; width: 100%; display: flex; justify-content: space-between; padding: 0 25px; box-sizing: border-box; opacity: 0.6; }
-        .cheek { width: 18px; height: 10px; background: #ff9999; border-radius: 50%; }
+        .blush { position: absolute; top: 65px; width: 100%; display: flex; justify-content: space-between; padding: 0 22px; box-sizing: border-box; opacity: 0.6; }
+        .cheek { width: 16px; height: 9px; background: #ff9999; border-radius: 50%; }
 
         #ui { 
             background: #fafafa; 
@@ -113,22 +131,7 @@
         button:active { transform: translateY(2px); box-shadow: 0 1px 0 #c2e0ff; }
         button:disabled { background: #ddd; color: #888; box-shadow: none; cursor: default; transform: none; }
 
-        #message { 
-            position: absolute; 
-            top: 15px; 
-            width: 85%; 
-            background: rgba(255,255,255,0.9); 
-            padding: 10px 15px; 
-            border-radius: 15px; 
-            text-align: center; 
-            font-size: 15px; 
-            font-weight: bold; 
-            color: #d66d87; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            border: 2px solid #ffb6c1;
-            z-index: 10;
-        }
-        .clothes-item { position: absolute; top: 110px; width: 160px; height: 160px; display: none; pointer-events: none; text-align: center; font-size: 85px; z-index: 5; }
+        .clothes-item { position: absolute; top: 90px; width: 150px; height: 150px; display: none; pointer-events: none; text-align: center; font-size: 80px; z-index: 5; }
         
         /* 옷장 모달 */
         #closet { 
@@ -154,7 +157,7 @@
 
 <div id="game-container">
     <div id="progress-header">
-        <span id="step-title">목욕 단계 1/5</span>
+        <span id="step-title">목욕 단계 1/6</span>
         <div class="progress-bar-container"><div id="progress-fill"></div></div>
     </div>
     <div id="message">안녕! 우리 같이 깨끗하게 씻고 옷 입을까?</div>
